@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy, Download, RotateCcw } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BadgeDisplay from "@/components/BadgeDisplay";
 import ProgressBar from "@/components/ProgressBar";
@@ -77,7 +76,6 @@ const Review = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
 
       <div className="container py-12">
         <div className="max-w-6xl mx-auto space-y-8">

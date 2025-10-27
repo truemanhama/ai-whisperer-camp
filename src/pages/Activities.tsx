@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Image, HelpCircle, Sparkles, ArrowRight } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getProgress } from "@/lib/progressStore";
 
@@ -44,7 +43,6 @@ const Activities = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
 
       <div className="container py-12">
         <div className="max-w-6xl mx-auto space-y-8">

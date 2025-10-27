@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle2, BookOpen, Lightbulb, Database, Cpu, Users, AlertCircle } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { markLessonComplete } from "@/lib/progressStore";
 import { useToast } from "@/hooks/use-toast";
@@ -212,7 +211,6 @@ const Lessons = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
 
       <div className="container py-12">
         <div className="max-w-4xl mx-auto space-y-8">

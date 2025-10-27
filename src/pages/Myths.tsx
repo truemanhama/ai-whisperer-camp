@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RotateCcw } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import QuizCard, { QuizQuestion } from "@/components/QuizCard";
 import { updateActivityScore } from "@/lib/progressStore";
 import { useToast } from "@/hooks/use-toast";
@@ -95,7 +94,6 @@ const Myths = () => {
   if (gameComplete) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="container py-12">
           <Card className="max-w-2xl mx-auto shadow-elevated text-center animate-bounce-in">
             <CardContent className="pt-12 pb-8 space-y-6">
@@ -125,7 +123,6 @@ const Myths = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
 
       <div className="container py-12">
         <div className="max-w-3xl mx-auto space-y-8">

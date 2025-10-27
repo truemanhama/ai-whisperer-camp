@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Brain, Sparkles, Target, Users } from "lucide-react";
 import heroRobot from "@/assets/hero-robot.jpg";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const Home = () => {
@@ -32,7 +31,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       
       {/* Hero Section */}
       <section className="relative overflow-hidden">

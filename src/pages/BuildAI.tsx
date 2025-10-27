@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Upload, Play, CheckCircle2, Sparkles } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import ProgressBar from "@/components/ProgressBar";
 import { updateActivityScore, earnBadge } from "@/lib/progressStore";
 import { useToast } from "@/hooks/use-toast";
@@ -49,7 +48,6 @@ const BuildAI = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
 
       <div className="container py-12">
         <div className="max-w-4xl mx-auto space-y-8">
