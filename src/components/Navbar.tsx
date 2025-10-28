@@ -10,6 +10,7 @@ const Navbar = () => {
     { path: "/", label: "Home", icon: Brain },
     { path: "/lessons", label: "Lessons", icon: BookOpen },
     { path: "/activities", label: "Activities", icon: Gamepad2 },
+    { path: "/ai-module", label: "AI & Data", icon: Brain },
     { path: "/review", label: "Review", icon: Trophy },
   ];
 

@@ -11,6 +11,7 @@ import RealOrAI from "./pages/RealOrAI";
 import Myths from "./pages/Myths";
 import BuildAI from "./pages/BuildAI";
 import Review from "./pages/Review";
+import AIModule from "./pages/AIModule";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/activities/real-or-ai" element={<RealOrAI />} />
           <Route path="/activities/myths" element={<Myths />} />
           <Route path="/activities/build-ai" element={<BuildAI />} />
+          <Route path="/ai-module" element={<AIModule />} />
           <Route path="/review" element={<Review />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
