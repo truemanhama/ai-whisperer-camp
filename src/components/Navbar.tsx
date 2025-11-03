@@ -23,7 +23,7 @@ const Navbar = () => {
             <Brain className="h-6 w-6 text-primary-foreground" />
           </div>
           <span className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-            AI Explorers
+            AI Literacy Initiative for Young Learners
           </span>
         </Link>
 
@@ -60,7 +60,7 @@ const Navbar = () => {
                 <div className="p-2 rounded-lg bg-gradient-hero shadow-glow">
                   <Brain className="h-6 w-6 text-primary-foreground" />
                 </div>
-                <span className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">AI Explorers</span>
+                <span className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">AI Literacy Initiative for Young Learners</span>
               </div>
               <div className="grid gap-2">
                 {navItems.map((item) => {
