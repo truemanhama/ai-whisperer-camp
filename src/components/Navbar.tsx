@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Brain, BookOpen, Gamepad2, Trophy } from "lucide-react";
+import { Brain, BookOpen, Gamepad2, Trophy, Menu } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 const Navbar = () => {
@@ -47,22 +48,39 @@ const Navbar = () => {
           })}
         </div>
 
-        <div className="flex md:hidden items-center space-x-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            return (
-              <Link key={item.path} to={item.path}>
-                <Button
-                  variant={isActive ? "default" : "ghost"}
-                  size="icon"
-                  className={cn(isActive && "shadow-glow")}
-                >
-                  <Icon className="h-5 w-5" />
-                </Button>
-              </Link>
-            );
-          })}
+        <div className="flex md:hidden items-center">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Open menu">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-4">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="p-2 rounded-lg bg-gradient-hero shadow-glow">
+                  <Brain className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <span className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">AI Explorers</span>
+              </div>
+              <div className="grid gap-2">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <Link key={item.path} to={item.path}>
+                      <Button
+                        variant={isActive ? "default" : "ghost"}
+                        className={cn("w-full justify-start gap-2", isActive && "shadow-glow")}
+                      >
+                        <Icon className="h-5 w-5" />
+                        {item.label}
+                      </Button>
+                    </Link>
+                  );
+                })}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </nav>
