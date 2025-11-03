@@ -35,7 +35,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero opacity-10" />
-        <div className="container relative py-20 md:py-32">
+        <div className="container relative py-20 md:py-32 px-4 md:px-0">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 animate-fade-in">
               <div className="inline-block px-4 py-2 bg-primary/10 rounded-full">
@@ -70,7 +70,7 @@ const Home = () => {
               <img
                 src={heroRobot}
                 alt="AI Robot Teaching"
-                className="relative rounded-2xl shadow-elevated"
+                className="relative rounded-2xl shadow-elevated w-full h-auto"
               />
             </div>
           </div>
@@ -79,7 +79,7 @@ const Home = () => {
 
       {/* Features Section */}
       <section className="py-20 bg-muted/50">
-        <div className="container">
+        <div className="container px-4 md:px-0">
           <div className="text-center mb-12 space-y-4 animate-slide-up">
             <h2 className="text-3xl md:text-4xl font-bold">
               What You'll Experience
@@ -118,7 +118,7 @@ const Home = () => {
 
       {/* CTA Section */}
       <section className="py-20">
-        <div className="container">
+        <div className="container px-4 md:px-0">
           <Card className="relative overflow-hidden shadow-elevated">
             <div className="absolute inset-0 bg-gradient-hero opacity-10" />
             <CardContent className="relative py-12 text-center space-y-6">
