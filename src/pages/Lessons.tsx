@@ -219,7 +219,7 @@ const Lessons = () => {
       
       toast({
         title: "Lesson Complete! 🎉",
-        description: "Great job! Moving to the next lesson...",
+        description: "You earned 20 points! Moving to the next lesson...",
       });
 
       // Move to next lesson after a short delay

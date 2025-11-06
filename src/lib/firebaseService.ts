@@ -22,6 +22,9 @@ export interface UserData {
 
 export interface UserProgress {
   completedLessons: string[];
+  lessonScores: {
+    [key: string]: number;
+  };
   activityScores: {
     [key: string]: number;
   };
@@ -82,6 +85,7 @@ export const saveUserData = async (userData: Omit<UserData, "createdAt" | "sessi
     const progressRef = doc(db, "userProgress", sessionId);
     const initialProgress: UserProgress = {
       completedLessons: [],
+      lessonScores: {},
       activityScores: {},
       badges: [],
       totalScore: 0,
@@ -126,6 +130,7 @@ export const getUserProgress = async (sessionId: string): Promise<UserProgress |
       const data = progressSnap.data();
       return {
         completedLessons: data.completedLessons || [],
+        lessonScores: data.lessonScores || {},
         activityScores: data.activityScores || {},
         badges: data.badges || [],
         totalScore: data.totalScore || 0,
@@ -158,11 +163,17 @@ export const saveActivityScore = async (
         score
       );
       
-      // Calculate total score
-      const totalScore = Object.values(activityScores).reduce(
+      // Calculate total score including lesson scores
+      const lessonScores = currentData.lessonScores || {};
+      const lessonPoints = Object.values(lessonScores).reduce(
         (sum: number, s: number) => sum + s,
         0
       );
+      const activityPoints = Object.values(activityScores).reduce(
+        (sum: number, s: number) => sum + s,
+        0
+      );
+      const totalScore = lessonPoints + activityPoints;
       
       await updateDoc(progressRef, {
         activityScores,
@@ -172,6 +183,50 @@ export const saveActivityScore = async (
     }
   } catch (error) {
     console.error("Error saving activity score:", error);
+    throw error;
+  }
+};
+
+// Save lesson score
+export const saveLessonScore = async (
+  sessionId: string,
+  lessonId: string,
+  score: number
+): Promise<void> => {
+  try {
+    const progressRef = doc(db, "userProgress", sessionId);
+    const progressSnap = await getDoc(progressRef);
+    
+    if (progressSnap.exists()) {
+      const currentData = progressSnap.data();
+      const lessonScores = currentData.lessonScores || {};
+      
+      // Keep the maximum score
+      lessonScores[lessonId] = Math.max(
+        lessonScores[lessonId] || 0,
+        score
+      );
+      
+      // Calculate total score including activity scores
+      const activityScores = currentData.activityScores || {};
+      const lessonPoints = Object.values(lessonScores).reduce(
+        (sum: number, s: number) => sum + s,
+        0
+      );
+      const activityPoints = Object.values(activityScores).reduce(
+        (sum: number, s: number) => sum + s,
+        0
+      );
+      const totalScore = lessonPoints + activityPoints;
+      
+      await updateDoc(progressRef, {
+        lessonScores,
+        totalScore,
+        updatedAt: serverTimestamp(),
+      });
+    }
+  } catch (error) {
+    console.error("Error saving lesson score:", error);
     throw error;
   }
 };

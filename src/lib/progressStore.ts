@@ -1,8 +1,11 @@
 // Simple local storage manager for user progress with Firebase sync
-import { saveActivityScore, updateUserProgress } from "./firebaseService";
+import { saveActivityScore, saveLessonScore, updateUserProgress } from "./firebaseService";
 
 interface UserProgress {
   completedLessons: string[];
+  lessonScores: {
+    [key: string]: number; // lessonId -> points earned
+  };
   activityScores: {
     [key: string]: number;
   };
@@ -15,6 +18,7 @@ const SESSION_STORAGE_KEY = "ai_explorers_session";
 
 const defaultProgress: UserProgress = {
   completedLessons: [],
+  lessonScores: {},
   activityScores: {},
   badges: [],
   totalScore: 0,
@@ -60,11 +64,35 @@ export const saveProgress = async (progress: UserProgress): Promise<void> => {
   }
 };
 
+// Points awarded per lesson
+const LESSON_POINTS = 20;
+
 export const markLessonComplete = async (lessonId: string): Promise<void> => {
   const progress = getProgress();
   if (!progress.completedLessons.includes(lessonId)) {
     progress.completedLessons.push(lessonId);
+    
+    // Award points for completing the lesson
+    if (!progress.lessonScores[lessonId]) {
+      progress.lessonScores[lessonId] = LESSON_POINTS;
+    }
+    
+    // Recalculate total score including lesson points
+    const lessonPoints = Object.values(progress.lessonScores).reduce((a, b) => a + b, 0);
+    const activityPoints = Object.values(progress.activityScores).reduce((a, b) => a + b, 0);
+    progress.totalScore = lessonPoints + activityPoints;
+    
     await saveProgress(progress);
+    
+    // Sync lesson score to Firebase
+    const sessionId = getSessionId();
+    if (sessionId) {
+      try {
+        await saveLessonScore(sessionId, lessonId, LESSON_POINTS);
+      } catch (error) {
+        console.error("Failed to save lesson score to Firebase:", error);
+      }
+    }
   }
 };
 
@@ -74,7 +102,11 @@ export const updateActivityScore = async (activityId: string, score: number): Pr
   const newScore = Math.max(previousScore, score);
   
   progress.activityScores[activityId] = newScore;
-  progress.totalScore = Object.values(progress.activityScores).reduce((a, b) => a + b, 0);
+  
+  // Recalculate total score including lesson points
+  const lessonPoints = Object.values(progress.lessonScores).reduce((a, b) => a + b, 0);
+  const activityPoints = Object.values(progress.activityScores).reduce((a, b) => a + b, 0);
+  progress.totalScore = lessonPoints + activityPoints;
   
   // Save to localStorage
   try {

@@ -56,8 +56,13 @@ const Review = () => {
     },
   ];
 
-  const totalPossibleScore = 300; // 100 points per activity
+  // Calculate total possible points: 5 lessons × 20 points + 3 activities × 100 points = 400 points
+  const totalPossibleScore = 400; // 100 points from lessons (5 × 20) + 300 points from activities (3 × 100)
   const completionPercentage = Math.round((progress.totalScore / totalPossibleScore) * 100);
+  
+  // Calculate lesson points earned
+  const lessonPoints = Object.values(progress.lessonScores || {}).reduce((a, b) => a + b, 0);
+  const activityPoints = Object.values(progress.activityScores).reduce((a, b) => a + b, 0);
 
   const handleReset = () => {
     if (confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
@@ -133,8 +138,32 @@ const Review = () => {
             </CardContent>
           </Card>
 
-          {/* Activity Scores */}
+          {/* Lesson Progress */}
           <Card className="shadow-card animate-slide-up" style={{ animationDelay: "0.1s" }}>
+            <CardHeader>
+              <CardTitle>Lesson Progress</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Lessons Completed</span>
+                <span className="text-sm text-muted-foreground">
+                  {lessonPoints} / 100 points
+                </span>
+              </div>
+              <ProgressBar
+                value={progress.completedLessons.length}
+                max={5}
+                label={`${progress.completedLessons.length} of 5 lessons completed`}
+                showPercentage={false}
+              />
+              <div className="text-xs text-muted-foreground mt-2">
+                Each completed lesson earns 20 points
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Activity Scores */}
+          <Card className="shadow-card animate-slide-up" style={{ animationDelay: "0.15s" }}>
             <CardHeader>
               <CardTitle>Activity Scores</CardTitle>
             </CardHeader>
@@ -157,6 +186,9 @@ const Review = () => {
                 label="Build a Mini AI"
                 showPercentage
               />
+              <div className="text-xs text-muted-foreground mt-2">
+                Activity points: {activityPoints} / 300
+              </div>
             </CardContent>
           </Card>
 
