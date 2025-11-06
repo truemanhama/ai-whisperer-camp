@@ -142,6 +142,36 @@ export const saveActivityScore = async (
   }
 };
 
+// Save activity reflection
+export const saveActivityReflection = async (
+  sessionId: string,
+  activityId: string,
+  reflection: string
+): Promise<void> => {
+  try {
+    const progressRef = doc(db, "userProgress", sessionId);
+    const progressSnap = await getDoc(progressRef);
+    
+    if (progressSnap.exists()) {
+      const currentData = progressSnap.data();
+      const reflections = currentData.reflections || {};
+      
+      reflections[activityId] = {
+        text: reflection,
+        timestamp: serverTimestamp(),
+      };
+      
+      await updateDoc(progressRef, {
+        reflections,
+        updatedAt: serverTimestamp(),
+      });
+    }
+  } catch (error) {
+    console.error("Error saving reflection:", error);
+    throw error;
+  }
+};
+
 // Admin functions
 export const getAllUsers = async (): Promise<(UserData & { id: string })[]> => {
   try {

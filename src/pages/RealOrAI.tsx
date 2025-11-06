@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, XCircle, RotateCcw } from "lucide-react";
 import { updateActivityScore } from "@/lib/progressStore";
+import { saveActivityReflection } from "@/lib/firebaseService";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/contexts/UserContext";
 
 interface ImageChallenge {
   id: number;
@@ -19,7 +22,10 @@ const RealOrAI = () => {
   const [answered, setAnswered] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<boolean | null>(null);
   const [gameComplete, setGameComplete] = useState(false);
+  const [showReflection, setShowReflection] = useState(false);
+  const [reflection, setReflection] = useState("");
   const { toast } = useToast();
+  const { user } = useUser();
 
   // Sample challenges (in real app, these would be actual image URLs)
   const challenges: ImageChallenge[] = [
@@ -53,6 +59,36 @@ const RealOrAI = () => {
       isAI: false,
       explanation: "This is a real landscape photo with authentic atmospheric perspective and natural light distribution.",
     },
+    {
+      id: 6,
+      url: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e",
+      isAI: false,
+      explanation: "Real photograph! The natural cloud formations and genuine sky colors show authentic atmospheric conditions.",
+    },
+    {
+      id: 7,
+      url: "https://images.unsplash.com/photo-1542281286-9e0a16bb7366",
+      isAI: true,
+      explanation: "AI-generated. Notice the overly smooth transitions and the slightly unnatural symmetry typical of AI-created images.",
+    },
+    {
+      id: 8,
+      url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
+      isAI: false,
+      explanation: "This is a real forest scene with natural lighting filtering through the trees and authentic depth of field.",
+    },
+    {
+      id: 9,
+      url: "https://images.unsplash.com/photo-1559827260-dc66d52bef19",
+      isAI: true,
+      explanation: "AI-generated. The architectural details have that characteristic AI 'perfectness' and some geometric inconsistencies.",
+    },
+    {
+      id: 10,
+      url: "https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5",
+      isAI: false,
+      explanation: "Real nature photograph! The organic patterns, authentic textures, and natural lighting are hallmarks of genuine photography.",
+    },
   ];
 
   const currentChallenge = challenges[currentIndex];
@@ -74,15 +110,36 @@ const RealOrAI = () => {
         setAnswered(false);
         setSelectedAnswer(null);
       } else {
-        setGameComplete(true);
         const finalScore = isCorrect ? score + 20 : score;
         await updateActivityScore("real-or-ai", finalScore);
-        toast({
-          title: "Activity Complete! 🎉",
-          description: `You scored ${finalScore} out of ${challenges.length * 20} points!`,
-        });
+        setShowReflection(true);
       }
     }, 3000);
+  };
+
+  const handleReflectionSubmit = async () => {
+    if (!reflection.trim()) {
+      toast({
+        title: "Please share your thoughts",
+        description: "We'd love to hear what you learned!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      if (user?.sessionId) {
+        await saveActivityReflection(user.sessionId, "real-or-ai", reflection);
+      }
+      setGameComplete(true);
+      toast({
+        title: "Activity Complete! 🎉",
+        description: `You scored ${score} out of ${challenges.length * 20} points!`,
+      });
+    } catch (error) {
+      console.error("Error saving reflection:", error);
+      setGameComplete(true);
+    }
   };
 
   const resetGame = () => {
@@ -91,7 +148,46 @@ const RealOrAI = () => {
     setAnswered(false);
     setSelectedAnswer(null);
     setGameComplete(false);
+    setShowReflection(false);
+    setReflection("");
   };
+
+  if (showReflection) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container py-12">
+          <Card className="max-w-2xl mx-auto shadow-elevated animate-fade-in">
+            <CardContent className="pt-12 pb-8 space-y-6">
+              <div className="text-center space-y-4">
+                <div className="text-5xl mb-4">💭</div>
+                <h2 className="text-3xl font-bold">Reflection Time</h2>
+                <p className="text-lg text-muted-foreground">
+                  Take a moment to reflect on what you learned
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-sm font-medium">
+                  What did you learn from this exercise about identifying real vs AI-generated images? 
+                  What strategies did you use?
+                </label>
+                <Textarea
+                  value={reflection}
+                  onChange={(e) => setReflection(e.target.value)}
+                  placeholder="Share your thoughts and what you learned..."
+                  className="min-h-[150px]"
+                />
+              </div>
+
+              <Button onClick={handleReflectionSubmit} size="lg" className="w-full">
+                Submit & See Results
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   if (gameComplete) {
     return (
