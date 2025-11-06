@@ -4,12 +4,16 @@ import {
   setDoc, 
   updateDoc, 
   getDoc,
+  query,
+  where,
+  getDocs,
   serverTimestamp 
 } from "firebase/firestore";
 import { db } from "./firebase";
 
 export interface UserData {
-  name: string;
+  firstName: string;
+  lastName: string;
   grade: string;
   school: string;
   createdAt: any;
@@ -28,6 +32,36 @@ export interface UserProgress {
 // Generate a unique session ID
 export const generateSessionId = (): string => {
   return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
+// Find user by first name and last name
+export const findUserByName = async (
+  firstName: string,
+  lastName: string
+): Promise<(UserData & { id: string }) | null> => {
+  try {
+    const usersRef = collection(db, "users");
+    const q = query(
+      usersRef,
+      where("firstName", "==", firstName.trim()),
+      where("lastName", "==", lastName.trim())
+    );
+    
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      return {
+        id: doc.id,
+        ...doc.data(),
+      } as UserData & { id: string };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error finding user by name:", error);
+    throw error;
+  }
 };
 
 // Save user information to Firebase

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,15 +12,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUser } from "@/contexts/UserContext";
-import { Loader2, Sparkles, Rocket, Brain, Zap } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, Sparkles, Rocket, Brain, Zap, ArrowRight } from "lucide-react";
 
 const WelcomeForm = () => {
-  const { setUser } = useUser();
-  const [name, setName] = useState("");
+  const { setUser, loginUser } = useUser();
+  const { toast } = useToast();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [grade, setGrade] = useState("");
   const [school, setSchool] = useState("");
+  const [step, setStep] = useState<"name" | "registration">("name");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isChecking, setIsChecking] = useState(false);
 
   const grades = [
     "Grade 1",
@@ -37,14 +42,48 @@ const WelcomeForm = () => {
     "Grade 12",
   ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleNameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!name.trim()) {
-      setError("Please enter your name");
+    if (!firstName.trim()) {
+      setError("Please enter your first name");
       return;
     }
+
+    if (!lastName.trim()) {
+      setError("Please enter your last name");
+      return;
+    }
+
+    setIsChecking(true);
+    try {
+      // Check if user exists
+      const userExists = await loginUser(firstName.trim(), lastName.trim());
+      
+      if (userExists) {
+        // User found, they're automatically logged in
+        toast({
+          title: "Welcome back! 🎉",
+          description: `Great to see you again, ${firstName}! Your progress has been loaded.`,
+        });
+        // The loginUser function already handles setting the user state
+        return;
+      } else {
+        // User doesn't exist, show registration fields
+        setStep("registration");
+      }
+    } catch (err) {
+      setError("Failed to check your information. Please try again.");
+      console.error(err);
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
+  const handleRegistrationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
 
     if (!grade) {
       setError("Please select your grade");
@@ -59,7 +98,8 @@ const WelcomeForm = () => {
     setIsLoading(true);
     try {
       await setUser({
-        name: name.trim(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         grade,
         school: school.trim(),
       });
@@ -191,148 +231,253 @@ const WelcomeForm = () => {
           </CardHeader>
 
           <CardContent>
-            <motion.form
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              onSubmit={handleSubmit}
-              className="space-y-5"
-            >
-              <motion.div
-                variants={itemVariants}
-                className="space-y-2"
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 400 }}
+            <AnimatePresence mode="wait">
+            {step === "name" ? (
+              <motion.form
+                key="name-form"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                onSubmit={handleNameSubmit}
+                className="space-y-5"
               >
-                <Label htmlFor="name" className="text-sm font-semibold">
-                  Name *
-                </Label>
                 <motion.div
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="Enter your name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    disabled={isLoading}
-                    required
-                    className="transition-all duration-300 focus:ring-2 focus:ring-primary focus:border-primary"
-                  />
-                </motion.div>
-              </motion.div>
-
-              <motion.div
-                variants={itemVariants}
-                className="space-y-2"
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Label htmlFor="grade" className="text-sm font-semibold">
-                  Grade *
-                </Label>
-                <motion.div
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <Select value={grade} onValueChange={setGrade} disabled={isLoading} required>
-                    <SelectTrigger
-                      id="grade"
-                      className="transition-all duration-300 focus:ring-2 focus:ring-primary"
-                    >
-                      <SelectValue placeholder="Select your grade" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {grades.map((g) => (
-                        <SelectItem key={g} value={g}>
-                          {g}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </motion.div>
-              </motion.div>
-
-              <motion.div
-                variants={itemVariants}
-                className="space-y-2"
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Label htmlFor="school" className="text-sm font-semibold">
-                  School *
-                </Label>
-                <motion.div
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <Input
-                    id="school"
-                    type="text"
-                    placeholder="Enter your school name"
-                    value={school}
-                    onChange={(e) => setSchool(e.target.value)}
-                    disabled={isLoading}
-                    required
-                    className="transition-all duration-300 focus:ring-2 focus:ring-primary focus:border-primary"
-                  />
-                </motion.div>
-              </motion.div>
-
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20"
-                >
-                  {error}
-                </motion.div>
-              )}
-
-              <motion.div variants={itemVariants}>
-                <motion.div
+                  variants={itemVariants}
+                  className="space-y-2"
                   whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400 }}
                 >
-                  <Button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                    disabled={isLoading}
-                    size="lg"
+                  <Label htmlFor="firstName" className="text-sm font-semibold">
+                    First Name *
+                  </Label>
+                  <motion.div
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 400 }}
                   >
-                    {isLoading ? (
-                      <motion.span
-                        className="flex items-center justify-center"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                      >
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Getting Started...
-                      </motion.span>
-                    ) : (
-                      <motion.span
-                        className="flex items-center justify-center gap-2"
-                        whileHover={{ gap: 8 }}
-                        transition={{ type: "spring", stiffness: 400 }}
-                      >
-                        Get Started
-                        <Rocket className="h-4 w-4" />
-                      </motion.span>
-                    )}
-                  </Button>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="Enter your first name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      disabled={isChecking || isLoading}
+                      required
+                      className="transition-all duration-300 focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </motion.div>
                 </motion.div>
-              </motion.div>
 
-              <motion.p
-                variants={itemVariants}
-                className="text-xs text-center text-muted-foreground"
+                <motion.div
+                  variants={itemVariants}
+                  className="space-y-2"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Label htmlFor="lastName" className="text-sm font-semibold">
+                    Last Name *
+                  </Label>
+                  <motion.div
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Enter your last name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      disabled={isChecking || isLoading}
+                      required
+                      className="transition-all duration-300 focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </motion.div>
+                </motion.div>
+
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                <motion.div variants={itemVariants}>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                      disabled={isChecking || isLoading}
+                      size="lg"
+                    >
+                      {isChecking ? (
+                        <motion.span
+                          className="flex items-center justify-center"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                        >
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Checking...
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          className="flex items-center justify-center gap-2"
+                          whileHover={{ gap: 8 }}
+                          transition={{ type: "spring", stiffness: 400 }}
+                        >
+                          Continue
+                          <ArrowRight className="h-4 w-4" />
+                        </motion.span>
+                      )}
+                    </Button>
+                  </motion.div>
+                </motion.div>
+              </motion.form>
+            ) : (
+              <motion.form
+                key="registration-form"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+                onSubmit={handleRegistrationSubmit}
+                className="space-y-5"
               >
-                Your information will be stored securely and used to track your progress
-              </motion.p>
-            </motion.form>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-primary/10 border border-primary/20 p-4 rounded-lg mb-4"
+                >
+                  <p className="text-sm text-center">
+                    <strong>Welcome, {firstName} {lastName}!</strong> We couldn't find you in our system. 
+                    Please complete your registration below.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  variants={itemVariants}
+                  className="space-y-2"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Label htmlFor="grade" className="text-sm font-semibold">
+                    Grade *
+                  </Label>
+                  <motion.div
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    <Select value={grade} onValueChange={setGrade} disabled={isLoading} required>
+                      <SelectTrigger
+                        id="grade"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary"
+                      >
+                        <SelectValue placeholder="Select your grade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {grades.map((g) => (
+                          <SelectItem key={g} value={g}>
+                            {g}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </motion.div>
+                </motion.div>
+
+                <motion.div
+                  variants={itemVariants}
+                  className="space-y-2"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Label htmlFor="school" className="text-sm font-semibold">
+                    School *
+                  </Label>
+                  <motion.div
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    <Input
+                      id="school"
+                      type="text"
+                      placeholder="Enter your school name"
+                      value={school}
+                      onChange={(e) => setSchool(e.target.value)}
+                      disabled={isLoading}
+                      required
+                      className="transition-all duration-300 focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </motion.div>
+                </motion.div>
+
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                <motion.div variants={itemVariants}>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                      disabled={isLoading}
+                      size="lg"
+                    >
+                      {isLoading ? (
+                        <motion.span
+                          className="flex items-center justify-center"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                        >
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Getting Started...
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          className="flex items-center justify-center gap-2"
+                          whileHover={{ gap: 8 }}
+                          transition={{ type: "spring", stiffness: 400 }}
+                        >
+                          Complete Registration
+                          <Rocket className="h-4 w-4" />
+                        </motion.span>
+                      )}
+                    </Button>
+                  </motion.div>
+                </motion.div>
+
+                <motion.button
+                  type="button"
+                  onClick={() => setStep("name")}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors w-full text-center"
+                >
+                  ← Back to name entry
+                </motion.button>
+
+                <motion.p
+                  variants={itemVariants}
+                  className="text-xs text-center text-muted-foreground"
+                >
+                  Your information will be stored securely and used to track your progress
+                </motion.p>
+              </motion.form>
+            )}
+            </AnimatePresence>
           </CardContent>
         </Card>
       </motion.div>

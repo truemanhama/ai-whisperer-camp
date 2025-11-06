@@ -1,10 +1,12 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { UserData, saveUserData } from "@/lib/firebaseService";
+import { UserData, saveUserData, findUserByName, getUserProgress } from "@/lib/firebaseService";
+import { saveProgress } from "@/lib/progressStore";
 
 interface UserContextType {
   user: UserData | null;
   sessionId: string | null;
   setUser: (user: Omit<UserData, "createdAt" | "sessionId">) => Promise<void>;
+  loginUser: (firstName: string, lastName: string) => Promise<boolean>;
   isRegistered: boolean;
 }
 
@@ -35,6 +37,36 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const loginUser = async (firstName: string, lastName: string): Promise<boolean> => {
+    try {
+      const foundUser = await findUserByName(firstName, lastName);
+      
+      if (foundUser) {
+        // User exists, load their data
+        setUserState(foundUser);
+        setSessionId(foundUser.sessionId);
+        setIsRegistered(true);
+        
+        // Save to localStorage
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(foundUser));
+        localStorage.setItem(SESSION_STORAGE_KEY, foundUser.sessionId);
+        
+        // Load progress from Firebase and sync to localStorage
+        const progress = await getUserProgress(foundUser.sessionId);
+        if (progress) {
+          await saveProgress(progress);
+        }
+        
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Error logging in user:", error);
+      throw error;
+    }
+  };
+
   const setUser = async (userData: Omit<UserData, "createdAt" | "sessionId">) => {
     try {
       const newSessionId = await saveUserData(userData);
@@ -59,7 +91,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, sessionId, setUser, isRegistered }}>
+    <UserContext.Provider value={{ user, sessionId, setUser, loginUser, isRegistered }}>
       {children}
     </UserContext.Provider>
   );
