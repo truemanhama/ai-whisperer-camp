@@ -19,9 +19,11 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center space-x-2 group">
-          <div className="p-2 rounded-lg bg-gradient-hero shadow-glow group-hover:animate-pulse-glow transition-all">
-            <Brain className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <img
+            src="/MF Logo_round.png"
+            alt="MF Logo"
+            className="h-8 w-8 rounded-full object-cover shadow-glow"
+          />
           <span className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">
             AI Literacy Initiative for Young Learners
           </span>
@@ -57,9 +59,11 @@ const Navbar = () => {
             </SheetTrigger>
             <SheetContent side="left" className="p-4">
               <div className="flex items-center space-x-2 mb-4">
-                <div className="p-2 rounded-lg bg-gradient-hero shadow-glow">
-                  <Brain className="h-6 w-6 text-primary-foreground" />
-                </div>
+                <img
+                  src="/MF Logo_round.png"
+                  alt="MF Logo"
+                  className="h-8 w-8 rounded-full object-cover shadow-glow"
+                />
                 <span className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">AI Literacy Initiative for Young Learners</span>
               </div>
               <div className="grid gap-2">

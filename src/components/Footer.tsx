@@ -47,7 +47,12 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
+        <div className="mt-8 pt-8 border-t border-border/40 relative text-center text-sm text-muted-foreground">
+          <img
+            src="/MF Logo_round.png"
+            alt="MF Logo"
+            className="h-8 w-8 rounded-full object-cover absolute left-0 top-1/2 -translate-y-1/2"
+          />
           © 2025 AI Explorers. Made for learning and exploration.
         </div>
       </div>
