@@ -11,10 +11,10 @@ const Lessons = () => {
   const [completedSections, setCompletedSections] = useState<string[]>([]);
   const { toast } = useToast();
 
-  const handleCompleteSection = (sectionId: string) => {
+  const handleCompleteSection = async (sectionId: string) => {
     if (!completedSections.includes(sectionId)) {
       setCompletedSections([...completedSections, sectionId]);
-      markLessonComplete(sectionId);
+      await markLessonComplete(sectionId);
       toast({
         title: "Section Complete! 🎉",
         description: "Great job! Keep learning.",

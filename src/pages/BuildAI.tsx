@@ -34,11 +34,11 @@ const BuildAI = () => {
     }, 100);
   };
 
-  const completeActivity = () => {
+  const completeActivity = async () => {
     setStep("complete");
-    updateActivityScore("build-ai", accuracy);
+    await updateActivityScore("build-ai", accuracy);
     if (accuracy >= 90) {
-      earnBadge("ai-builder");
+      await earnBadge("ai-builder");
     }
     toast({
       title: "Activity Complete! 🎉",

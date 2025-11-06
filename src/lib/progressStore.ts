@@ -1,4 +1,6 @@
-// Simple local storage manager for user progress
+// Simple local storage manager for user progress with Firebase sync
+import { saveActivityScore, updateUserProgress } from "./firebaseService";
+
 interface UserProgress {
   completedLessons: string[];
   activityScores: {
@@ -9,12 +11,35 @@ interface UserProgress {
 }
 
 const STORAGE_KEY = "ai_explorers_progress";
+const SESSION_STORAGE_KEY = "ai_explorers_session";
 
 const defaultProgress: UserProgress = {
   completedLessons: [],
   activityScores: {},
   badges: [],
   totalScore: 0,
+};
+
+// Get session ID from localStorage
+const getSessionId = (): string | null => {
+  try {
+    return localStorage.getItem(SESSION_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+};
+
+// Sync progress to Firebase if sessionId is available
+const syncToFirebase = async (progress: UserProgress): Promise<void> => {
+  const sessionId = getSessionId();
+  if (sessionId) {
+    try {
+      await updateUserProgress(sessionId, progress);
+    } catch (error) {
+      console.error("Failed to sync progress to Firebase:", error);
+      // Don't throw - we still want to save to localStorage
+    }
+  }
 };
 
 export const getProgress = (): UserProgress => {
@@ -26,37 +51,54 @@ export const getProgress = (): UserProgress => {
   }
 };
 
-export const saveProgress = (progress: UserProgress): void => {
+export const saveProgress = async (progress: UserProgress): Promise<void> => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    await syncToFirebase(progress);
   } catch (error) {
     console.error("Failed to save progress:", error);
   }
 };
 
-export const markLessonComplete = (lessonId: string): void => {
+export const markLessonComplete = async (lessonId: string): Promise<void> => {
   const progress = getProgress();
   if (!progress.completedLessons.includes(lessonId)) {
     progress.completedLessons.push(lessonId);
-    saveProgress(progress);
+    await saveProgress(progress);
   }
 };
 
-export const updateActivityScore = (activityId: string, score: number): void => {
+export const updateActivityScore = async (activityId: string, score: number): Promise<void> => {
   const progress = getProgress();
-  progress.activityScores[activityId] = Math.max(
-    progress.activityScores[activityId] || 0,
-    score
-  );
+  const previousScore = progress.activityScores[activityId] || 0;
+  const newScore = Math.max(previousScore, score);
+  
+  progress.activityScores[activityId] = newScore;
   progress.totalScore = Object.values(progress.activityScores).reduce((a, b) => a + b, 0);
-  saveProgress(progress);
+  
+  // Save to localStorage
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  } catch (error) {
+    console.error("Failed to save progress to localStorage:", error);
+  }
+  
+  // Sync to Firebase
+  const sessionId = getSessionId();
+  if (sessionId) {
+    try {
+      await saveActivityScore(sessionId, activityId, newScore);
+    } catch (error) {
+      console.error("Failed to save activity score to Firebase:", error);
+    }
+  }
 };
 
-export const earnBadge = (badgeId: string): void => {
+export const earnBadge = async (badgeId: string): Promise<void> => {
   const progress = getProgress();
   if (!progress.badges.includes(badgeId)) {
     progress.badges.push(badgeId);
-    saveProgress(progress);
+    await saveProgress(progress);
   }
 };
 

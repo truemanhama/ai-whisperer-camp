@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { UserProvider, useUser } from "./contexts/UserContext";
+import WelcomeForm from "./components/WelcomeForm";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Lessons from "./pages/Lessons";
@@ -16,25 +18,41 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  const { isRegistered } = useUser();
+
+  if (!isRegistered) {
+    return <WelcomeForm />;
+  }
+
+  return (
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/lessons" element={<Lessons />} />
+        <Route path="/activities" element={<Activities />} />
+        <Route path="/activities/real-or-ai" element={<RealOrAI />} />
+        <Route path="/activities/myths" element={<Myths />} />
+        <Route path="/activities/build-ai" element={<BuildAI />} />
+        <Route path="/ai-module" element={<AIModule />} />
+        <Route path="/review" element={<Review />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/lessons" element={<Lessons />} />
-          <Route path="/activities" element={<Activities />} />
-          <Route path="/activities/real-or-ai" element={<RealOrAI />} />
-          <Route path="/activities/myths" element={<Myths />} />
-          <Route path="/activities/build-ai" element={<BuildAI />} />
-          <Route path="/ai-module" element={<AIModule />} />
-          <Route path="/review" element={<Review />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <UserProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </UserProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

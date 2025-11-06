@@ -68,7 +68,7 @@ const RealOrAI = () => {
       setScore(score + 20);
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (currentIndex < challenges.length - 1) {
         setCurrentIndex(currentIndex + 1);
         setAnswered(false);
@@ -76,7 +76,7 @@ const RealOrAI = () => {
       } else {
         setGameComplete(true);
         const finalScore = isCorrect ? score + 20 : score;
-        updateActivityScore("real-or-ai", finalScore);
+        await updateActivityScore("real-or-ai", finalScore);
         toast({
           title: "Activity Complete! 🎉",
           description: `You scored ${finalScore} out of ${challenges.length * 20} points!`,

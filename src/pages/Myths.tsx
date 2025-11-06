@@ -70,13 +70,13 @@ const Myths = () => {
       setScore(score + Math.round(100 / questions.length));
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (currentIndex < questions.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
         const finalScore = correct ? score + Math.round(100 / questions.length) : score;
         setGameComplete(true);
-        updateActivityScore("myths-quiz", finalScore);
+        await updateActivityScore("myths-quiz", finalScore);
         toast({
           title: "Quiz Complete! 🎉",
           description: `You scored ${finalScore} out of 100 points!`,
