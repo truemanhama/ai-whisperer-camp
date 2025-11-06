@@ -15,6 +15,11 @@ const Activities = () => {
     return null; // ProtectedRoute will handle redirect
   }
 
+  // Check if first two activities are completed
+  const firstTwoCompleted = 
+    (progress.activityScores["real-or-ai"] || 0) > 0 && 
+    (progress.activityScores["myths-quiz"] || 0) > 0;
+
   const activities = [
     {
       id: "real-or-ai",
@@ -25,6 +30,7 @@ const Activities = () => {
       difficulty: "Easy",
       points: progress.activityScores["real-or-ai"] || 0,
       color: "bg-gradient-to-br from-purple-500 to-blue-500",
+      locked: false,
     },
     {
       id: "myths-quiz",
@@ -35,6 +41,7 @@ const Activities = () => {
       difficulty: "Medium",
       points: progress.activityScores["myths-quiz"] || 0,
       color: "bg-gradient-to-br from-cyan-500 to-teal-500",
+      locked: false,
     },
     {
       id: "build-ai",
@@ -45,6 +52,7 @@ const Activities = () => {
       difficulty: "Advanced",
       points: progress.activityScores["build-ai"] || 0,
       color: "bg-gradient-to-br from-orange-500 to-pink-500",
+      locked: !firstTwoCompleted,
     },
   ];
 
@@ -97,11 +105,17 @@ const Activities = () => {
                       </span>
                     </div>
                     
-                    <Link to={activity.path}>
-                      <Button className="w-full gap-2">
-                        Start Activity <ArrowRight className="h-4 w-4" />
+                    {activity.locked ? (
+                      <Button className="w-full gap-2" disabled>
+                        🔒 Complete first 2 activities
                       </Button>
-                    </Link>
+                    ) : (
+                      <Link to={activity.path}>
+                        <Button className="w-full gap-2">
+                          Start Activity <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    )}
                   </CardContent>
                 </Card>
               );

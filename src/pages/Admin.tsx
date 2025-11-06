@@ -283,7 +283,7 @@ const Admin = () => {
                       <div key={user.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h3 className="font-semibold">{user.name}</h3>
+                            <h3 className="font-semibold">{user.firstName} {user.lastName}</h3>
                             <p className="text-sm text-muted-foreground">
                               {user.school} • Grade {user.grade}
                             </p>
