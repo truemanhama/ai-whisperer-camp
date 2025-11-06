@@ -142,3 +142,32 @@ export const saveActivityScore = async (
   }
 };
 
+// Admin functions
+export const getAllUsers = async (): Promise<(UserData & { id: string })[]> => {
+  try {
+    const { getDocs, collection } = await import("firebase/firestore");
+    const usersSnapshot = await getDocs(collection(db, "users"));
+    return usersSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    } as UserData & { id: string }));
+  } catch (error) {
+    console.error("Error getting all users:", error);
+    throw error;
+  }
+};
+
+export const getAllUserProgress = async (): Promise<(UserProgress & { sessionId: string })[]> => {
+  try {
+    const { getDocs, collection } = await import("firebase/firestore");
+    const progressSnapshot = await getDocs(collection(db, "userProgress"));
+    return progressSnapshot.docs.map((doc) => ({
+      sessionId: doc.id,
+      ...doc.data(),
+    } as UserProgress & { sessionId: string }));
+  } catch (error) {
+    console.error("Error getting all user progress:", error);
+    throw error;
+  }
+};
+

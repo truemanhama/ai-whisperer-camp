@@ -14,6 +14,7 @@ import Myths from "./pages/Myths";
 import BuildAI from "./pages/BuildAI";
 import Review from "./pages/Review";
 import AIModule from "./pages/AIModule";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const AppContent = () => {
         <Route path="/activities/build-ai" element={<BuildAI />} />
         <Route path="/ai-module" element={<AIModule />} />
         <Route path="/review" element={<Review />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

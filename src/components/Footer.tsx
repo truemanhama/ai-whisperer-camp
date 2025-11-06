@@ -53,7 +53,17 @@ const Footer = () => {
             alt="MF Logo"
             className="h-8 w-8 rounded-full object-cover absolute left-0 top-1/2 -translate-y-1/2"
           />
-          © 2025 AI Explorers. Made for learning and exploration.
+          <div>
+            © 2025 AI Explorers. Made for learning and exploration.
+          </div>
+          <div className="mt-2">
+            <a 
+              href="/admin" 
+              className="text-xs text-muted-foreground/60 hover:text-primary transition-colors"
+            >
+              Admin
+            </a>
+          </div>
         </div>
       </div>
     </footer>
