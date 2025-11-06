@@ -1,31 +1,77 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Upload, Play, CheckCircle2, Sparkles } from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 import { updateActivityScore, earnBadge } from "@/lib/progressStore";
+import { 
+  logActivityStart, 
+  logActivityInteraction, 
+  logActivityCompletion 
+} from "@/lib/firebaseService";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/contexts/UserContext";
 
 const BuildAI = () => {
   const [step, setStep] = useState<"intro" | "training" | "testing" | "complete">("intro");
   const [trainingProgress, setTrainingProgress] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
+  const [activitySessionId, setActivitySessionId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user, isRegistered, sessionId } = useUser();
 
-  const startTraining = () => {
+  // Redirect if not logged in (additional safeguard)
+  if (!isRegistered || !user) {
+    return null; // ProtectedRoute will handle redirect
+  }
+
+  // Log activity start when component mounts
+  useEffect(() => {
+    const startActivity = async () => {
+      if (sessionId && !activitySessionId) {
+        try {
+          const sessionId_doc = await logActivityStart(sessionId, "build-ai");
+          setActivitySessionId(sessionId_doc);
+        } catch (error) {
+          console.error("Error starting activity session:", error);
+        }
+      }
+    };
+    startActivity();
+  }, [sessionId, activitySessionId]);
+
+  const startTraining = async () => {
     setStep("training");
     setTrainingProgress(0);
+
+    // Log training start
+    if (activitySessionId) {
+      await logActivityInteraction(activitySessionId, {
+        type: "training_start",
+        data: {},
+      });
+    }
 
     // Simulate training progress
     const interval = setInterval(() => {
       setTrainingProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
-          setTimeout(() => {
+          setTimeout(async () => {
             const finalAccuracy = Math.floor(Math.random() * 15) + 80; // 80-95%
             setAccuracy(finalAccuracy);
             setStep("testing");
+            
+            // Log training completion
+            if (activitySessionId) {
+              await logActivityInteraction(activitySessionId, {
+                type: "training_complete",
+                data: {
+                  accuracy: finalAccuracy,
+                },
+              });
+            }
           }, 500);
           return 100;
         }
@@ -37,9 +83,20 @@ const BuildAI = () => {
   const completeActivity = async () => {
     setStep("complete");
     await updateActivityScore("build-ai", accuracy);
-    if (accuracy >= 90) {
+    
+    const earnedBadge = accuracy >= 90;
+    if (earnedBadge) {
       await earnBadge("ai-builder");
     }
+    
+    // Log completion
+    if (activitySessionId) {
+      await logActivityCompletion(activitySessionId, accuracy, {
+        earnedBadge,
+        step: "complete",
+      });
+    }
+    
     toast({
       title: "Activity Complete! 🎉",
       description: `Your AI achieved ${accuracy}% accuracy!`,

@@ -7,7 +7,7 @@ import {
   query,
   where,
   getDocs,
-  serverTimestamp 
+  serverTimestamp
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -202,6 +202,114 @@ export const saveActivityReflection = async (
     }
   } catch (error) {
     console.error("Error saving reflection:", error);
+    throw error;
+  }
+};
+
+// Activity interaction logging interface
+export interface ActivityInteraction {
+  type: string; // 'answer', 'choice', 'input', 'complete', etc.
+  data: any; // Interaction-specific data
+  timestamp: any;
+}
+
+export interface ActivitySession {
+  activityId: string;
+  sessionId: string;
+  startTime: any;
+  endTime?: any;
+  interactions: ActivityInteraction[];
+  finalScore?: number;
+  completed: boolean;
+  timeSpent?: number; // in seconds
+}
+
+// Log activity start
+export const logActivityStart = async (
+  sessionId: string,
+  activityId: string
+): Promise<string> => {
+  try {
+    const activitySessionsRef = collection(db, "activitySessions");
+    const sessionDoc = doc(activitySessionsRef);
+    const sessionId_doc = sessionDoc.id;
+    
+    const session: ActivitySession = {
+      activityId,
+      sessionId,
+      startTime: serverTimestamp(),
+      interactions: [],
+      completed: false,
+    };
+    
+    await setDoc(sessionDoc, session);
+    return sessionId_doc;
+  } catch (error) {
+    console.error("Error logging activity start:", error);
+    throw error;
+  }
+};
+
+// Log activity interaction
+export const logActivityInteraction = async (
+  activitySessionId: string,
+  interaction: Omit<ActivityInteraction, "timestamp">
+): Promise<void> => {
+  try {
+    const sessionRef = doc(db, "activitySessions", activitySessionId);
+    const sessionSnap = await getDoc(sessionRef);
+    
+    if (sessionSnap.exists()) {
+      const currentData = sessionSnap.data() as ActivitySession;
+      const interactions = currentData.interactions || [];
+      
+      interactions.push({
+        ...interaction,
+        timestamp: serverTimestamp(),
+      });
+      
+      await updateDoc(sessionRef, {
+        interactions,
+        updatedAt: serverTimestamp(),
+      });
+    }
+  } catch (error) {
+    console.error("Error logging interaction:", error);
+    throw error;
+  }
+};
+
+// Log activity completion
+export const logActivityCompletion = async (
+  activitySessionId: string,
+  finalScore?: number,
+  additionalData?: any
+): Promise<void> => {
+  try {
+    const sessionRef = doc(db, "activitySessions", activitySessionId);
+    const sessionSnap = await getDoc(sessionRef);
+    
+    if (sessionSnap.exists()) {
+      const currentData = sessionSnap.data() as ActivitySession;
+      const startTime = currentData.startTime;
+      
+      // Calculate time spent (if startTime is a timestamp)
+      let timeSpent: number | undefined;
+      if (startTime && startTime.toMillis) {
+        timeSpent = Math.floor((Date.now() - startTime.toMillis()) / 1000);
+      }
+      
+      await updateDoc(sessionRef, {
+        endTime: serverTimestamp(),
+        finalScore,
+        completed: true,
+        timeSpent,
+        ...additionalData,
+        updatedAt: serverTimestamp(),
+      });
+    }
+  } catch (error) {
+    console.error("Error logging activity completion:", error);
     throw error;
   }
 };

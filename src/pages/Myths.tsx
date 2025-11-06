@@ -1,16 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RotateCcw } from "lucide-react";
 import QuizCard, { QuizQuestion } from "@/components/QuizCard";
 import { updateActivityScore } from "@/lib/progressStore";
+import { 
+  logActivityStart, 
+  logActivityInteraction, 
+  logActivityCompletion 
+} from "@/lib/firebaseService";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/contexts/UserContext";
 
 const Myths = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [gameComplete, setGameComplete] = useState(false);
+  const [activitySessionId, setActivitySessionId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user, isRegistered, sessionId } = useUser();
+
+  // Redirect if not logged in (additional safeguard)
+  if (!isRegistered || !user) {
+    return null; // ProtectedRoute will handle redirect
+  }
+
+  // Log activity start when component mounts
+  useEffect(() => {
+    const startActivity = async () => {
+      if (sessionId && !activitySessionId) {
+        try {
+          const sessionId_doc = await logActivityStart(sessionId, "myths-quiz");
+          setActivitySessionId(sessionId_doc);
+        } catch (error) {
+          console.error("Error starting activity session:", error);
+        }
+      }
+    };
+    startActivity();
+  }, [sessionId, activitySessionId]);
 
   const questions: QuizQuestion[] = [
     {
@@ -65,18 +93,45 @@ const Myths = () => {
 
   const currentQuestion = questions[currentIndex];
 
-  const handleAnswer = (correct: boolean) => {
+  const handleAnswer = async (correct: boolean) => {
+    const question = questions[currentIndex];
+    const pointsPerQuestion = Math.round(100 / questions.length);
+    const newScore = correct ? score + pointsPerQuestion : score;
+    
+    // Log the answer interaction
+    if (activitySessionId) {
+      await logActivityInteraction(activitySessionId, {
+        type: "answer",
+        data: {
+          questionId: question.id,
+          question: question.question,
+          isCorrect: correct,
+          score: newScore,
+          questionIndex: currentIndex,
+        },
+      });
+    }
+
     if (correct) {
-      setScore(score + Math.round(100 / questions.length));
+      setScore(newScore);
     }
 
     setTimeout(async () => {
       if (currentIndex < questions.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
-        const finalScore = correct ? score + Math.round(100 / questions.length) : score;
+        const finalScore = correct ? newScore : score;
         setGameComplete(true);
         await updateActivityScore("myths-quiz", finalScore);
+        
+        // Log completion
+        if (activitySessionId) {
+          await logActivityCompletion(activitySessionId, finalScore, {
+            totalQuestions: questions.length,
+            correctAnswers: Math.floor(finalScore / pointsPerQuestion),
+          });
+        }
+        
         toast({
           title: "Quiz Complete! 🎉",
           description: `You scored ${finalScore} out of 100 points!`,
@@ -85,10 +140,20 @@ const Myths = () => {
     }, 2500);
   };
 
-  const resetQuiz = () => {
+  const resetQuiz = async () => {
     setCurrentIndex(0);
     setScore(0);
     setGameComplete(false);
+    
+    // Start a new activity session
+    if (sessionId) {
+      try {
+        const sessionId_doc = await logActivityStart(sessionId, "myths-quiz");
+        setActivitySessionId(sessionId_doc);
+      } catch (error) {
+        console.error("Error starting new activity session:", error);
+      }
+    }
   };
 
   if (gameComplete) {

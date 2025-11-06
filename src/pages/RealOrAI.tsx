@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, XCircle, RotateCcw } from "lucide-react";
 import { updateActivityScore } from "@/lib/progressStore";
-import { saveActivityReflection } from "@/lib/firebaseService";
+import { 
+  saveActivityReflection, 
+  logActivityStart, 
+  logActivityInteraction, 
+  logActivityCompletion 
+} from "@/lib/firebaseService";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
@@ -24,8 +29,29 @@ const RealOrAI = () => {
   const [gameComplete, setGameComplete] = useState(false);
   const [showReflection, setShowReflection] = useState(false);
   const [reflection, setReflection] = useState("");
+  const [activitySessionId, setActivitySessionId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { user } = useUser();
+  const { user, isRegistered, sessionId } = useUser();
+
+  // Redirect if not logged in (additional safeguard)
+  if (!isRegistered || !user) {
+    return null; // ProtectedRoute will handle redirect
+  }
+
+  // Log activity start when component mounts
+  useEffect(() => {
+    const startActivity = async () => {
+      if (sessionId && !activitySessionId) {
+        try {
+          const sessionId_doc = await logActivityStart(sessionId, "real-or-ai");
+          setActivitySessionId(sessionId_doc);
+        } catch (error) {
+          console.error("Error starting activity session:", error);
+        }
+      }
+    };
+    startActivity();
+  }, [sessionId, activitySessionId]);
 
   // Sample challenges (in real app, these would be actual image URLs)
   const challenges: ImageChallenge[] = [
@@ -93,15 +119,32 @@ const RealOrAI = () => {
 
   const currentChallenge = challenges[currentIndex];
 
-  const handleAnswer = (answer: boolean) => {
+  const handleAnswer = async (answer: boolean) => {
     if (answered) return;
 
     setSelectedAnswer(answer);
     setAnswered(true);
 
     const isCorrect = answer === currentChallenge.isAI;
+    const newScore = isCorrect ? score + 20 : score;
+    
+    // Log the answer interaction
+    if (activitySessionId) {
+      await logActivityInteraction(activitySessionId, {
+        type: "answer",
+        data: {
+          challengeId: currentChallenge.id,
+          userAnswer: answer,
+          correctAnswer: currentChallenge.isAI,
+          isCorrect,
+          score: newScore,
+          challengeIndex: currentIndex,
+        },
+      });
+    }
+
     if (isCorrect) {
-      setScore(score + 20);
+      setScore(newScore);
     }
 
     setTimeout(async () => {
@@ -110,8 +153,17 @@ const RealOrAI = () => {
         setAnswered(false);
         setSelectedAnswer(null);
       } else {
-        const finalScore = isCorrect ? score + 20 : score;
+        const finalScore = isCorrect ? newScore : score;
         await updateActivityScore("real-or-ai", finalScore);
+        
+        // Log completion
+        if (activitySessionId) {
+          await logActivityCompletion(activitySessionId, finalScore, {
+            totalChallenges: challenges.length,
+            correctAnswers: Math.floor(finalScore / 20),
+          });
+        }
+        
         setShowReflection(true);
       }
     }, 3000);
@@ -130,6 +182,16 @@ const RealOrAI = () => {
     try {
       if (user?.sessionId) {
         await saveActivityReflection(user.sessionId, "real-or-ai", reflection);
+        
+        // Log reflection submission
+        if (activitySessionId) {
+          await logActivityInteraction(activitySessionId, {
+            type: "reflection",
+            data: {
+              reflection: reflection.trim(),
+            },
+          });
+        }
       }
       setGameComplete(true);
       toast({
@@ -142,7 +204,7 @@ const RealOrAI = () => {
     }
   };
 
-  const resetGame = () => {
+  const resetGame = async () => {
     setCurrentIndex(0);
     setScore(0);
     setAnswered(false);
@@ -150,6 +212,16 @@ const RealOrAI = () => {
     setGameComplete(false);
     setShowReflection(false);
     setReflection("");
+    
+    // Start a new activity session
+    if (sessionId) {
+      try {
+        const sessionId_doc = await logActivityStart(sessionId, "real-or-ai");
+        setActivitySessionId(sessionId_doc);
+      } catch (error) {
+        console.error("Error starting new activity session:", error);
+      }
+    }
   };
 
   if (showReflection) {

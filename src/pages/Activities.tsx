@@ -4,9 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Image, HelpCircle, Sparkles, ArrowRight } from "lucide-react";
 import Footer from "@/components/Footer";
 import { getProgress } from "@/lib/progressStore";
+import { useUser } from "@/contexts/UserContext";
 
 const Activities = () => {
   const progress = getProgress();
+  const { user, isRegistered } = useUser();
+
+  // Redirect if not logged in (additional safeguard)
+  if (!isRegistered || !user) {
+    return null; // ProtectedRoute will handle redirect
+  }
 
   const activities = [
     {

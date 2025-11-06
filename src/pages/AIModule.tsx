@@ -11,10 +11,38 @@ import QuickQuiz from "@/components/activities/QuickQuiz";
 import SortData from "@/components/activities/SortData";
 import ModelingSimulation from "@/components/activities/ModelingSimulation";
 import WrapUp from "@/components/activities/WrapUp";
+import { 
+  logActivityStart, 
+  logActivityInteraction, 
+  logActivityCompletion 
+} from "@/lib/firebaseService";
+import { useUser } from "@/contexts/UserContext";
 
 const AIModule = () => {
   const [currentSection, setCurrentSection] = useState(0);
   const [moduleData, setModuleData] = useState<any>({});
+  const [moduleSessionId, setModuleSessionId] = useState<string | null>(null);
+  const { user, isRegistered, sessionId } = useUser();
+
+  // Redirect if not logged in (additional safeguard)
+  if (!isRegistered || !user) {
+    return null; // ProtectedRoute will handle redirect
+  }
+
+  // Log module start when component mounts
+  useEffect(() => {
+    const startModule = async () => {
+      if (sessionId && !moduleSessionId) {
+        try {
+          const sessionId_doc = await logActivityStart(sessionId, "ai-module");
+          setModuleSessionId(sessionId_doc);
+        } catch (error) {
+          console.error("Error starting module session:", error);
+        }
+      }
+    };
+    startModule();
+  }, [sessionId, moduleSessionId]);
 
   const sections = [
     {
@@ -64,12 +92,42 @@ const AIModule = () => {
     },
     {
       title: "Reflection & Wrap-Up",
-      component: <WrapUp moduleData={moduleData} />
+      component: <WrapUp moduleData={moduleData} onComplete={async () => {
+        // Log module completion
+        if (moduleSessionId) {
+          await logActivityCompletion(moduleSessionId, undefined, {
+            moduleData,
+            allActivitiesCompleted: true,
+          });
+        }
+      }} />
     }
   ];
 
-  const updateModuleData = (key: string, data: any) => {
+  const updateModuleData = async (key: string, data: any) => {
     setModuleData((prev: any) => ({ ...prev, [key]: data }));
+    
+    // Log activity completion
+    if (moduleSessionId) {
+      const activityNames: { [key: string]: string } = {
+        wordCloud: "Word Cloud",
+        questionsGame: "Questions Only Game",
+        aiPrediction: "AI Prediction Challenge",
+        dataSharing: "Data Sharing Map",
+        quickQuiz: "Quick Quiz on Data",
+        sortData: "Data Type Sorting",
+        simulation: "Climate Modeling Simulation",
+      };
+      
+      await logActivityInteraction(moduleSessionId, {
+        type: "sub_activity_complete",
+        data: {
+          activityName: activityNames[key] || key,
+          activityKey: key,
+          result: data,
+        },
+      });
+    }
   };
 
   const progress = ((currentSection) / (sections.length - 1)) * 100;

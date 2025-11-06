@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import WelcomeForm from "./components/WelcomeForm";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Lessons from "./pages/Lessons";
@@ -20,9 +21,10 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { isRegistered } = useUser();
+  const { isRegistered, user } = useUser();
 
-  if (!isRegistered) {
+  // Show welcome form if user is not registered or user data doesn't exist
+  if (!isRegistered || !user) {
     return <WelcomeForm />;
   }
 
@@ -31,13 +33,62 @@ const AppContent = () => {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/lessons" element={<Lessons />} />
-        <Route path="/activities" element={<Activities />} />
-        <Route path="/activities/real-or-ai" element={<RealOrAI />} />
-        <Route path="/activities/myths" element={<Myths />} />
-        <Route path="/activities/build-ai" element={<BuildAI />} />
-        <Route path="/ai-module" element={<AIModule />} />
-        <Route path="/review" element={<Review />} />
+        <Route 
+          path="/lessons" 
+          element={
+            <ProtectedRoute>
+              <Lessons />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/activities" 
+          element={
+            <ProtectedRoute>
+              <Activities />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/activities/real-or-ai" 
+          element={
+            <ProtectedRoute>
+              <RealOrAI />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/activities/myths" 
+          element={
+            <ProtectedRoute>
+              <Myths />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/activities/build-ai" 
+          element={
+            <ProtectedRoute>
+              <BuildAI />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/ai-module" 
+          element={
+            <ProtectedRoute>
+              <AIModule />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/review" 
+          element={
+            <ProtectedRoute>
+              <Review />
+            </ProtectedRoute>
+          } 
+        />
         <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

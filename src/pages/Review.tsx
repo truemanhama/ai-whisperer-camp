@@ -6,10 +6,15 @@ import BadgeDisplay from "@/components/BadgeDisplay";
 import ProgressBar from "@/components/ProgressBar";
 import { getProgress, resetProgress } from "@/lib/progressStore";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/contexts/UserContext";
 
 const Review = () => {
   const progress = getProgress();
   const { toast } = useToast();
+  const { user } = useUser();
+  
+  // Get user's first name, or fallback to "there" if not available
+  const userName = user?.firstName || "there";
 
   const badges = [
     {
@@ -82,7 +87,7 @@ const Review = () => {
           {/* Header */}
           <div className="text-center space-y-4 animate-fade-in">
             <h1 className="text-4xl font-bold">
-              Your <span className="bg-gradient-hero bg-clip-text text-transparent">Progress</span>
+              👋 {userName}, here is your progress.
             </h1>
             <p className="text-lg text-muted-foreground">
               Track your learning journey and earn achievements

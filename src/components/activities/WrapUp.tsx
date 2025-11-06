@@ -6,9 +6,10 @@ import { Award, Download } from "lucide-react";
 
 interface WrapUpProps {
   moduleData: any;
+  onComplete?: () => void;
 }
 
-const WrapUp = ({ moduleData }: WrapUpProps) => {
+const WrapUp = ({ moduleData, onComplete }: WrapUpProps) => {
   const [reflections, setReflections] = useState({
     intelligence: "",
     aiData: "",
@@ -75,6 +76,11 @@ Generated on: ${new Date().toLocaleDateString()}
     a.download = "ai-data-module-summary.txt";
     a.click();
     URL.revokeObjectURL(url);
+    
+    // Call onComplete when download is triggered (module fully complete)
+    if (onComplete) {
+      onComplete();
+    }
   };
 
   return (
