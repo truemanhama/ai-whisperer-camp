@@ -7,6 +7,7 @@ import ProgressBar from "@/components/ProgressBar";
 import { getProgress, resetProgress } from "@/lib/progressStore";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/contexts/UserContext";
+import jsPDF from "jspdf";
 
 const Review = () => {
   const progress = getProgress();
@@ -71,10 +72,108 @@ const Review = () => {
   };
 
   const handleDownloadCertificate = () => {
-    toast({
-      title: "Certificate Feature",
-      description: "Certificate download would be implemented here with a PDF generator.",
-    });
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "User information not available",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Create PDF in landscape orientation
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      // Background color
+      pdf.setFillColor(240, 248, 255);
+      pdf.rect(0, 0, pageWidth, pageHeight, "F");
+
+      // Border
+      pdf.setDrawColor(59, 130, 246);
+      pdf.setLineWidth(2);
+      pdf.rect(10, 10, pageWidth - 20, pageHeight - 20, "S");
+
+      // Inner decorative border
+      pdf.setLineWidth(0.5);
+      pdf.rect(15, 15, pageWidth - 30, pageHeight - 30, "S");
+
+      // Title
+      pdf.setFontSize(40);
+      pdf.setTextColor(30, 58, 138);
+      pdf.text("Certificate of Completion", pageWidth / 2, 40, { align: "center" });
+
+      // Decorative line under title
+      pdf.setLineWidth(1);
+      pdf.setDrawColor(59, 130, 246);
+      pdf.line(60, 50, pageWidth - 60, 50);
+
+      // Main text
+      pdf.setFontSize(18);
+      pdf.setTextColor(50, 50, 50);
+      pdf.text("This is to certify that", pageWidth / 2, 75, { align: "center" });
+
+      // User name
+      pdf.setFontSize(32);
+      pdf.setTextColor(59, 130, 246);
+      pdf.setFont(undefined, "bold");
+      pdf.text(`${user.firstName} ${user.lastName}`, pageWidth / 2, 95, { align: "center" });
+
+      // Achievement text
+      pdf.setFontSize(18);
+      pdf.setTextColor(50, 50, 50);
+      pdf.setFont(undefined, "normal");
+      pdf.text("has successfully completed", pageWidth / 2, 115, { align: "center" });
+
+      // Course name
+      pdf.setFontSize(24);
+      pdf.setTextColor(30, 58, 138);
+      pdf.setFont(undefined, "bold");
+      pdf.text("AI Explorers Course", pageWidth / 2, 135, { align: "center" });
+
+      // Score and details
+      pdf.setFontSize(14);
+      pdf.setTextColor(50, 50, 50);
+      pdf.setFont(undefined, "normal");
+      pdf.text(`Total Score: ${progress.totalScore} points | Completion: ${completionPercentage}%`, pageWidth / 2, 152, { align: "center" });
+      pdf.text(`Badges Earned: ${earnedBadges}/${badges.length}`, pageWidth / 2, 162, { align: "center" });
+
+      // Date
+      const today = new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      pdf.setFontSize(12);
+      pdf.text(`Issued on: ${today}`, pageWidth / 2, 180, { align: "center" });
+
+      // Footer
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text("AI Explorers Educational Platform", pageWidth / 2, pageHeight - 20, { align: "center" });
+
+      // Save the PDF
+      pdf.save(`AI-Explorers-Certificate-${user.firstName}-${user.lastName}.pdf`);
+
+      toast({
+        title: "Certificate Downloaded",
+        description: "Your certificate has been saved successfully!",
+      });
+    } catch (error) {
+      console.error("Error generating certificate:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate certificate. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const earnedBadges = badges.filter((b) => b.earned).length;
