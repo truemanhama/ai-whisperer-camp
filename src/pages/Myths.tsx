@@ -55,7 +55,7 @@ const Myths = () => {
       options: ["True - AI will become our overlords", "False - This is science fiction"],
       correctAnswer: 1,
       explanation:
-        "False! This is a common movie trope but not reality. AI is a tool created and controlled by humans. It doesn't have goals, desires, or the ability to 'take over' — it only does what it's programmed to do.",
+        "False! This is a common movie trope but not reality. AI is a tool created and controlled by humans. It doesn't have goals, desires, or the ability to 'take over', it only does what it's programmed to do.",
     },
     {
       id: "3",
@@ -79,7 +79,7 @@ const Myths = () => {
       options: ["True - You need coding skills", "False - Anyone can use AI"],
       correctAnswer: 1,
       explanation:
-        "False! While creating AI systems requires technical knowledge, many AI tools are designed for everyone to use — like voice assistants, photo apps, and chatbots. You don't need to be a programmer to benefit from AI!",
+        "False! While creating AI systems requires technical knowledge, many AI tools are designed for everyone to use, like voice assistants, photo apps, and chatbots. You don't need to be a programmer to benefit from AI!",
     },
     {
       id: "6",

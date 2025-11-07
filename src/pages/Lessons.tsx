@@ -17,14 +17,14 @@ const lessonSections = [
     content: (
       <>
         <p className="mb-4 text-base leading-relaxed">
-          Imagine you have a super-helpful robot friend who can learn things, remember them, and make smart decisions — almost like a human! That's what <strong>Artificial Intelligence (AI)</strong> is — a way of making computers and machines think and learn like us.
+          Imagine you have a super-helpful robot friend who can learn things, remember them, and make smart decisions, almost like a human! That's what <strong>Artificial Intelligence (AI)</strong> is, a way of making computers and machines think and learn like us.
         </p>
         <p className="mb-4 text-base leading-relaxed">
-          AI isn't magic; it's when machines are trained to notice patterns and use them to do tasks like chatting, playing music, or recommending YouTube videos. Think of how Netflix suggests what to watch next or how your phone's camera identifies your face — that's AI at work!
+          AI isn't magic; it's when machines are trained to notice patterns and use them to do tasks like chatting, playing music, or recommending YouTube videos. Think of how Netflix suggests what to watch next or how your phone's camera identifies your face, that's AI at work!
         </p>
         <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 p-4 rounded-lg mb-4 border border-primary/20">
           <p className="text-sm">
-            <strong>💡 Remember:</strong> AI doesn't have feelings or creativity like humans. It follows what it's taught, but it can learn from examples and get better over time — just like you get better at cricket after practice.
+            <strong>💡 Remember:</strong> AI doesn't have feelings or creativity like humans. It follows what it's taught, but it can learn from examples and get better over time, just like you get better at cricket after practice.
           </p>
         </div>
         <p className="text-base leading-relaxed font-semibold text-primary">
@@ -43,14 +43,14 @@ const lessonSections = [
           Let's say you're learning to recognise fruits. At first, someone shows you many apples and bananas. You notice that apples are round and red, and bananas are long and yellow. Soon, you can tell them apart even without help.
         </p>
         <p className="mb-4 text-base leading-relaxed">
-          AI works the same way! It learns from <strong>examples (data)</strong> — thousands or even millions of them. For instance, if we want an AI to recognise cats, we show it tons of cat photos. Over time, it learns what makes a cat look like a cat.
+          AI works the same way! It learns from <strong>examples (data)</strong>, thousands or even millions of them. For instance, if we want an AI to recognise cats, we show it tons of cat photos. Over time, it learns what makes a cat look like a cat.
         </p>
         <div className="bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-cyan-950/20 dark:to-teal-950/20 p-4 rounded-lg mb-4 border border-primary/20">
           <p className="text-sm mb-2">
             <strong>🧠 Key Point:</strong> It doesn't "understand" like humans do, but it gets really good at spotting patterns. The more examples it sees, the smarter it becomes.
           </p>
           <p className="text-sm">
-            Think of it like a cricket player improving by watching replays — the more it sees, the better it predicts what's coming next. That's how AI learns — through <strong>practice, repetition, and feedback</strong>!
+            Think of it like a cricket player improving by watching replays, the more it sees, the better it predicts what's coming next. That's how AI learns, through <strong>practice, repetition, and feedback</strong>!
           </p>
         </div>
       </>
@@ -63,7 +63,7 @@ const lessonSections = [
     content: (
       <>
         <p className="mb-4 text-base leading-relaxed">
-          AI learns from the data we give it — so if the data is unfair or one-sided, the AI's decisions can also be unfair. This is called <strong>bias</strong>.
+          AI learns from the data we give it, so if the data is unfair or one-sided, the AI's decisions can also be unfair. This is called <strong>bias</strong>.
         </p>
         <div className="bg-warning/10 border-2 border-warning/30 p-4 rounded-lg mb-4">
           <h4 className="font-semibold mb-2 flex items-center gap-2 text-warning">
@@ -71,15 +71,15 @@ const lessonSections = [
             Example of Bias
           </h4>
           <p className="text-sm mb-2">
-            Imagine your school's "AI prefect" only learned from pictures of tall students wearing glasses. If a short student without glasses walks in, the AI might not recognise them as a prefect — not because it's mean, but because it never learned about other types!
+            Imagine your school's "AI prefect" only learned from pictures of tall students wearing glasses. If a short student without glasses walks in, the AI might not recognise them as a prefect, not because it's mean, but because it never learned about other types!
           </p>
         </div>
         <p className="mb-4 text-base leading-relaxed">
-          That's why humans must check and guide AI — just like a teacher corrects your homework when you make mistakes.
+          That's why humans must check and guide AI, just like a teacher corrects your homework when you make mistakes.
         </p>
         <div className="bg-success/10 border border-success/30 p-4 rounded-lg">
           <p className="text-sm">
-            <strong>✅ The Solution:</strong> AI bias reminds us to <strong>teach AI fairly</strong>, using data that includes all kinds of people, languages, and situations. It's like ensuring your cricket coach watches <em>every</em> player — not just the top scorers.
+            <strong>✅ The Solution:</strong> AI bias reminds us to <strong>teach AI fairly</strong>, using data that includes all kinds of people, languages, and situations. It's like ensuring your cricket coach watches <em>every</em> player, not just the top scorers.
           </p>
           <p className="text-sm mt-2">
             When we use AI responsibly, it becomes fairer, kinder, and more helpful to everyone.
@@ -95,7 +95,7 @@ const lessonSections = [
     content: (
       <>
         <p className="mb-4 text-base leading-relaxed">
-          AI is like a super assistant — powerful when used wisely. You can use it to <strong>learn faster</strong>, <strong>save time</strong>, or <strong>get creative ideas</strong>. For example:
+          AI is like a super assistant, powerful when used wisely. You can use it to <strong>learn faster</strong>, <strong>save time</strong>, or <strong>get creative ideas</strong>. For example:
         </p>
         <ul className="space-y-2 mb-4 list-disc list-inside text-base">
           <li>Use AI chatbots to summarise chapters or explain tough concepts.</li>
@@ -107,14 +107,14 @@ const lessonSections = [
             🎯 The Golden Rule:
           </p>
           <p className="text-sm mb-2">
-            <strong>Don't let AI think for you — let it think <em>with</em> you.</strong>
+            <strong>Don't let AI think for you, let it think <em>with</em> you.</strong>
           </p>
           <p className="text-sm">
             Always double-check what it says, just like you'd check your friend's homework before copying it. AI can sometimes make confident mistakes, so your own judgment is super important.
           </p>
         </div>
         <p className="text-base leading-relaxed">
-          Think of AI as your friendly study partner — helpful, smart, but not perfect. You're still the captain; AI is just your assistant on this learning journey.
+          Think of AI as your friendly study partner, helpful, smart, but not perfect. You're still the captain; AI is just your assistant on this learning journey.
         </p>
       </>
     ),
@@ -126,7 +126,7 @@ const lessonSections = [
     content: (
       <>
         <p className="mb-4 text-base leading-relaxed">
-          You've already met AI — you just might not have realised it! Here are some places it hides in plain sight:
+          You've already met AI, you just might not have realised it! Here are some places it hides in plain sight:
         </p>
         <div className="grid sm:grid-cols-2 gap-3 mb-4">
           <div className="bg-gradient-card p-4 rounded-lg border border-primary/10">
@@ -182,7 +182,7 @@ const lessonSections = [
           Even your school's attendance system, digital banking apps, and language translators use AI.
         </p>
         <p className="text-base leading-relaxed mt-2 font-semibold text-primary">
-          So, next time you ask your phone for directions or play a smart game, remember — you're already working <em>with</em> AI.
+          So, next time you ask your phone for directions or play a smart game, remember, you're already working <em>with</em> AI.
         </p>
       </>
     ),

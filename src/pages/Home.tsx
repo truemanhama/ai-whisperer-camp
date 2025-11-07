@@ -48,7 +48,7 @@ const Home = () => {
                 </span>
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                The AI Literacy Initiative for Young Learners is a dynamic project by Melton Foundation Fellows designed to make Artificial Intelligence exciting, understandable, and meaningful for high school students. Through interactive sessions, stories, and hands-on activities, the initiative helps learners discover what AI really is, how it shapes their daily lives, and how they can use it responsibly and creatively. From smart recommendations on their phones to voice assistants and digital art tools, students explore the hidden world of AI in fun, relatable ways. The goal is simple yet powerful — to sensitise and empower young minds to navigate the AI-driven world confidently, thoughtfully, and with curiosity.
+                The AI Literacy Initiative for Young Learners is a dynamic project by Melton Foundation Fellows designed to make Artificial Intelligence exciting, understandable, and meaningful for high school students. Through interactive sessions, stories, and hands-on activities, the initiative helps learners discover what AI really is, how it shapes their daily lives, and how they can use it responsibly and creatively. From smart recommendations on their phones to voice assistants and digital art tools, students explore the hidden world of AI in fun, relatable ways. The goal is simple yet powerful, to sensitise and empower young minds to navigate the AI-driven world confidently, thoughtfully, and with curiosity.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/lessons">

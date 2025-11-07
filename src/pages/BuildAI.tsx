@@ -181,7 +181,7 @@ const BuildAI = () => {
                   <p className="text-sm font-medium mb-2">💡 Real-World Connection</p>
                   <p className="text-sm text-muted-foreground">
                     This same process is used to train AI for facial recognition, medical 
-                    diagnosis, self-driving cars, and more — just with much more data and 
+                    diagnosis, self-driving cars, and more, just with much more data and 
                     computing power!
                   </p>
                 </div>
