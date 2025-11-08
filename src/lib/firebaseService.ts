@@ -30,6 +30,12 @@ export interface UserProgress {
   };
   badges: string[];
   totalScore: number;
+  reflections?: {
+    [activityId: string]: {
+      text: string;
+      timestamp: any;
+    };
+  };
 }
 
 // Generate a unique session ID
@@ -394,6 +400,21 @@ export const getAllUserProgress = async (): Promise<(UserProgress & { sessionId:
     } as UserProgress & { sessionId: string }));
   } catch (error) {
     console.error("Error getting all user progress:", error);
+    throw error;
+  }
+};
+
+// Get all activity sessions
+export const getAllActivitySessions = async (): Promise<(ActivitySession & { id: string })[]> => {
+  try {
+    const { getDocs, collection } = await import("firebase/firestore");
+    const sessionsSnapshot = await getDocs(collection(db, "activitySessions"));
+    return sessionsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    } as ActivitySession & { id: string }));
+  } catch (error) {
+    console.error("Error getting all activity sessions:", error);
     throw error;
   }
 };
