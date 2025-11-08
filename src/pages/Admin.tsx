@@ -2,40 +2,141 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { getAllUsers, getAllUserProgress, UserData, UserProgress } from "@/lib/firebaseService";
-import { Users, TrendingUp, Award, BookOpen, Download, FileSpreadsheet } from "lucide-react";
+import { Users, TrendingUp, Award, BookOpen, Download, FileSpreadsheet, Lock, LogOut, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
 import jsPDF from "jspdf";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
+
+// Admin credentials
+const ADMIN_EMAIL = "superadmin@aiexplorers.com";
+const ADMIN_PASSWORD = "Pass@w0rd123!";
+const ADMIN_AUTH_KEY = "ai_explorers_admin_auth";
+
+// Admin authentication utilities
+const isAdminAuthenticated = (): boolean => {
+  const authData = localStorage.getItem(ADMIN_AUTH_KEY);
+  if (!authData) return false;
+  
+  try {
+    const { email, timestamp } = JSON.parse(authData);
+    // Check if session is valid (24 hours)
+    const sessionDuration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    const isExpired = Date.now() - timestamp > sessionDuration;
+    
+    if (isExpired) {
+      localStorage.removeItem(ADMIN_AUTH_KEY);
+      return false;
+    }
+    
+    return email === ADMIN_EMAIL;
+  } catch {
+    return false;
+  }
+};
+
+const setAdminAuth = (email: string) => {
+  localStorage.setItem(ADMIN_AUTH_KEY, JSON.stringify({
+    email,
+    timestamp: Date.now(),
+  }));
+};
+
+const clearAdminAuth = () => {
+  localStorage.removeItem(ADMIN_AUTH_KEY);
+};
 
 const Admin = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [users, setUsers] = useState<(UserData & { id: string })[]>([]);
   const [progress, setProgress] = useState<(UserProgress & { sessionId: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [exportingCSV, setExportingCSV] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
+  // Check authentication on mount
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [usersData, progressData] = await Promise.all([
-          getAllUsers(),
-          getAllUserProgress(),
-        ]);
-        setUsers(usersData);
-        setProgress(progressData);
-      } catch (error) {
-        console.error("Error fetching admin data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    const authenticated = isAdminAuthenticated();
+    setIsAuthenticated(authenticated);
+    if (authenticated) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
   }, []);
+
+  const fetchData = async () => {
+    try {
+      const [usersData, progressData] = await Promise.all([
+        getAllUsers(),
+        getAllUserProgress(),
+      ]);
+      setUsers(usersData);
+      setProgress(progressData);
+    } catch (error) {
+      console.error("Error fetching admin data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError("");
+    setIsLoggingIn(true);
+
+    // Simple validation
+    if (!email.trim() || !password.trim()) {
+      setLoginError("Please enter both email and password");
+      setIsLoggingIn(false);
+      return;
+    }
+
+    // Check credentials
+    if (email.trim() === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      setAdminAuth(email.trim());
+      setIsAuthenticated(true);
+      toast({
+        title: "Login Successful",
+        description: "Welcome to the Admin Dashboard",
+      });
+      await fetchData();
+    } else {
+      setLoginError("Invalid email or password");
+      toast({
+        title: "Login Failed",
+        description: "Invalid credentials. Please try again.",
+        variant: "destructive",
+      });
+    }
+
+    setIsLoggingIn(false);
+  };
+
+  const handleLogout = () => {
+    clearAdminAuth();
+    setIsAuthenticated(false);
+    setUsers([]);
+    setProgress([]);
+    setEmail("");
+    setPassword("");
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out",
+    });
+  };
 
   // Calculate statistics
   const totalUsers = users.length;
@@ -554,6 +655,90 @@ const Admin = () => {
     }
   };
 
+  // Show login form if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex flex-col">
+        {/* Back Button */}
+        <div className="container py-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate(-1)}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        </div>
+
+        {/* Login Form - Full Screen Container */}
+        <div className="flex-1 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-md"
+          >
+            <Card className="shadow-elevated border-2 border-primary/20">
+              <CardHeader className="text-center space-y-2">
+                <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 flex items-center justify-center mb-4">
+                  <Lock className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl">Admin Login</CardTitle>
+                <CardDescription>
+                  Enter your credentials to access the admin dashboard
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="admin@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoggingIn}
+                      required
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoggingIn}
+                      required
+                      className="w-full"
+                    />
+                  </div>
+                  {loginError && (
+                    <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                      {loginError}
+                    </div>
+                  )}
+                  <Button
+                    type="submit"
+                    disabled={isLoggingIn}
+                    className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white font-semibold"
+                  >
+                    {isLoggingIn ? "Logging in..." : "Login"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        <Footer />
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -579,6 +764,14 @@ const Admin = () => {
               </p>
             </div>
             <div className="flex gap-2 w-full md:w-auto">
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
               <Button
                 onClick={exportToPDF}
                 disabled={exporting || users.length === 0}
